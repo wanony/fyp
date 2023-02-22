@@ -86,7 +86,7 @@ def add_annotation(mask_path, image_id, annotation_id):
         x, y, w, h = 0, 0, 0, 0
 
     # Create annotation dictionary
-    return {
+    annotation = {
         "id": annotation_id,
         "image_id": image_id,
         "category_id": 1,
@@ -94,6 +94,16 @@ def add_annotation(mask_path, image_id, annotation_id):
         "area": w * h,
         "iscrowd": 0
     }
+
+    # Generate segmentation data
+    segmentation = []
+    for contour in contours:
+        # Convert contour to segmentation format
+        segmentation.append(contour.flatten().tolist())
+
+    annotation["segmentation"] = segmentation
+
+    return annotation
 
 
 def populate_annotations(mas3k_path, coco_dict):
