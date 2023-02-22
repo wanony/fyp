@@ -1,7 +1,16 @@
 import json
+import sys
 from pathlib import Path
-import cv2 as cv2
-import numpy as np
+try:
+    import cv2 as cv2
+except ImportError:
+    print("Failed to import cv2, please install this requirement")
+    sys.exit(1)
+try:
+    import numpy as np
+except ImportError:
+    print("Failed to import numpy, please install this requirement")
+    sys.exit(1)
 import argparse
 from tqdm import tqdm
 
@@ -14,11 +23,6 @@ def parse_args():
         'MAS3K_path',
         type=str,
         help='Path to the MAS3K dataset root directory'
-    )
-    parser.add_argument(
-        'output_location',
-        type=str,
-        help='Output location for the COCO annotations'
     )
     args = parser.parse_args()
 
