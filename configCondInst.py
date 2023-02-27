@@ -38,23 +38,23 @@ palettes = [(220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228
 # only take the colours needed for our classes
 cfg.palette = palettes[:len(cfg.classes)]
 
-cfg.total_epochs = 12
+cfg.max_iter = 12
 
 cfg.data_root = 'data/FishDataset'
 
-cfg.data.samples_per_gpu = 2
-cfg.data.workers_per_gpu = 8
+cfg.train_dataloader.dataset.type = 'COCODataset'
+cfg.train_dataloader.dataset.ann_file = cfg.data_root + 'annotations/MAIS2K_train.json'
+cfg.train_dataloader.dataset.data_prefix = cfg.data_root + 'train_MAIS2K/raw/'
+cfg.train_dataloader.num_workers = 8
+cfg.train_dataloader.batch_size = 2
 
-# TODO data is not the correct work, change this
-cfg.data.train.type = 'COCODataset'
-cfg.data.train.ann_file = cfg.data_root + 'annotations/MAIS2K_train.json'
-cfg.data.train.img_prefix = cfg.data_root + 'train_MAIS2K/raw/'
+cfg.val_dataloader.dataset.type = 'COCODataset'
+cfg.val_dataloader.dataset.ann_file = cfg.data_root + 'annotations/MAIS2K_test.json'
+cfg.val_dataloader.dataset.data_prefix = cfg.data_root + 'train_MAIS2K/raw/'
+cfg.val_dataloader.num_workers = 2
+cfg.val_dataloader.batch_size = 1
 
-cfg.data.test.ann_file = cfg.data_root + 'annotations/MAIS2K_test.json'
-cfg.data.test.img_prefix = cfg.data_root + 'train_MAIS2K/raw/'
-
-cfg.data.val.ann_file = cfg.data.test.ann_file
-cfg.data.val.img_prefix = cfg.data.test.img_prefix
+cfg.test_dataloader = cfg.val_dataloader
 
 cfg.work_dir = './outputs/CondInst/test_1'
 
