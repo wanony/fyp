@@ -1,5 +1,6 @@
 import json
 import sys
+import pandas
 
 try:
     import cv2 as cv2
@@ -27,12 +28,12 @@ from convert_from_coco import *
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Convert MAS3K Dataset to COCO format"
+        description="Convert DeepFish Dataset to COCO format"
     )
     parser.add_argument(
-        'MAS3K_path',
+        'DeepFish_path',
         type=str,
-        help='Path to the MAS3K dataset root directory'
+        help='Path to the DeepFish dataset root directory'
     )
     args = parser.parse_args()
 
@@ -85,10 +86,15 @@ def populate_annotations(mas3k_path, coco_dict):
 
 def main():
     args = parse_args()
-    # Set paths to MAS3K dataset and COCO format output file
-    mas3k_path = args.MAS3K_path
-    mas3k_train = mas3k_path + ("train" if mas3k_path[-1] == '/' else '/train')
-    mas3k_test = mas3k_path + ("test" if mas3k_path[-1] == '/' else '/test')
+    # Set paths to DeepFish dataset and COCO format output file
+    df_path = args.DeepFish_path + ("Segmentation" if args.DeepFish_path[-1] == '/' else '/Segmentation')
+    df_seg_train_csv = df_path + "/train.csv"
+    df_seg_test_csv = df_path + "/test.csv"
+    train_files = []
+    test_files = []
+
+    # get the train and test files from the CSV data
+    df = pandas.read_csv(df_seg_train_csv)
 
     # Create COCO format dictionaries
     train_dict = create_coco_dict()
