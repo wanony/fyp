@@ -10,9 +10,10 @@ cfg = Config.fromfile(config_file_locations)
 # Initialise metainfo for config
 # Dictionary of classes and palette
 # Tuple of Strings of the classes used in the annotation file
-classes = ("clupeid", "cod", "dab", "dogfish", "haddock", "herring", "plaice", "prawn", "sole", "sprat", "squid",
-           "unk fish", "unk flatfish", "unk gadoid", "unk organism", "unk round fish", "whiting",)
+# classes = ("clupeid", "cod", "dab", "dogfish", "haddock", "herring", "plaice", "prawn", "sole", "sprat", "squid",
+#            "unk fish", "unk flatfish", "unk gadoid", "unk organism", "unk round fish", "whiting",)
 
+classes = ('Coelenterate', 'Mammal', 'MarineFish', 'Mollusc', 'Arthropod', 'Reptile', 'Conch', 'Octopus', 'Slug', 'StarFish', 'JellyFish', 'Crab', 'Pagurian', 'Shrimp', 'Turtle', 'Dolphin', 'Seal', 'Shark', 'ClownFish', 'Butterflyfish', 'Fish', 'Flounder', 'Grouper', 'SurgeonFish', 'LeafySeaDragon', 'FrogFish', 'GhostPipeFish', 'PipeFish', 'ScorpionFish', 'SeaHorse', 'Stingaree', 'MantaRay', 'AngelFish', 'MorayEel', 'ElectricRay', 'CuttleFish', 'SeaCucumber', 'BatFish', 'CrocodileFish', 'RatFish', 'LionFish', 'TriggerFish', 'Piranha')
 # List of Tuples of RGB colours, taken from mmdetection/mmdet/datasets/coco.py
 palettes = [(220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228),
             (0, 60, 100), (0, 80, 100), (0, 0, 70), (0, 0, 192), (250, 170, 30),
@@ -40,20 +41,23 @@ palette = palettes[:len(classes)]
 
 # finally, set the metainfo in the config
 cfg.metainfo = {
-    'CLASSES': classes,
-    'PALETTE': palette
+    'classes': classes,
+    'palette': palette
 }
 
 # set the root of our dataset
 cfg.data_root = "data/FishDataset"
+cfg.data_root = "data/MAS3K"
 # set a directory to output our model and config
-cfg.work_dir = './outputs/test_2_8_2023'
+cfg.work_dir = './'
 
 # TRAIN DATASET CONFIG
 cfg.train_dataloader.dataset.type = "CocoDataset"  # dataset is annotated in COCO format
 cfg.train_dataloader.dataset.ann_file = "annotations/MAIS2K_train.json"  # point to the train annotation file
+cfg.train_dataloader.dataset.ann_file = "train/annotations_coco.json"
 cfg.train_dataloader.dataset.data_root = cfg.data_root
 cfg.train_dataloader.dataset.data_prefix.img = 'train_MAIS2K/raw/'
+cfg.train_dataloader.dataset.data_prefix.img = "train/Image/"
 cfg.train_dataloader.dataset.metainfo = cfg.metainfo
 cfg.train_dataloader.batch_size = 2  # for single GPU, set to 2
 cfg.train_dataloader.num_workers = 8
@@ -61,8 +65,10 @@ cfg.train_dataloader.num_workers = 8
 # TEST DATASET CONFIG
 cfg.test_dataloader.dataset.type = "CocoDataset"
 cfg.test_dataloader.dataset.ann_file = "annotations/MAIS2K_test.json"
+cfg.test_dataloader.dataset.ann_file = "test/annotations_coco.json"
 cfg.test_dataloader.dataset.data_root = cfg.data_root
 cfg.test_dataloader.dataset.data_prefix.img = cfg.train_dataloader.dataset.data_prefix.img  # set to training dataset
+cfg.test_dataloader.dataset.data_prefix.img = "test/Image/"
 cfg.test_dataloader.dataset.metainfo = cfg.metainfo
 cfg.test_dataloader.batch_size = 2  # for single GPU, set to 2
 cfg.test_dataloader.num_workers = 8
@@ -73,21 +79,23 @@ cfg.val_dataloader.dataset.type = "CocoDataset"
 cfg.val_dataloader.dataset.ann_file = cfg.test_dataloader.dataset.ann_file  # there is none, so point to test
 cfg.val_dataloader.dataset.data_root = cfg.data_root
 cfg.val_dataloader.dataset.data_prefix.img = 'val_MAIS2K/raw/'
+cfg.val_dataloader.dataset.data_prefix.img = cfg.test_dataloader.dataset.data_prefix.img
 cfg.val_dataloader.dataset.metainfo = cfg.metainfo
 cfg.val_dataloader.batch_size = 2  # for single GPU, set to 2
 cfg.val_dataloader.num_workers = 8
 
 # EVALUATOR CONFIG
 cfg.test_evaluator.ann_file = cfg.data_root + "/annotations/MAIS2K_test.json"
+cfg.test_evaluator.ann_file = cfg.data_root + "/test/annotations_coco.json"
 cfg.val_evaluator.ann_file = cfg.test_evaluator.ann_file
 # Modify num classes of the model in box head and mask head
-cfg.model.bbox_head.num_classes = 17
+cfg.model.bbox_head.num_classes = len(classes)
 
 # cfg.load_from = 'outputs/test/epoch_1.pth'
 
-cfg.train_cfg.val_interval = 10
-cfg.train_cfg.max_epochs = 30
-cfg.default_hooks.checkpoint.interval = 10
+cfg.train_cfg.val_interval = 1
+cfg.train_cfg.max_epochs = 1
+cfg.default_hooks.checkpoint.interval = 1
 #
 # cfg.optim_wrapper.optimizer.lr = 0.02 / 8
 # cfg.default_hooks.logger.interval = 10

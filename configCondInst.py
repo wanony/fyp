@@ -1,10 +1,17 @@
 from mmengine import Config
 from mmengine.runner import Runner
 from mmengine.runner import set_random_seed
+from datasets import FewShotCocoDataset
+from mmdet.models.detectors import CondInst
+from mmdet.utils import register_all_modules
+from mmdet.registry import MODELS
+from loops.FewShotTrainLoops import MAMLIterBasedTrainLoop
+
 
 # Set path to the config file for the model being used
 config_file_location = '../mmdetection/configs/condinst/condinst_r50_fpn_ms-poly-90k_coco_instance.py'
 # Load the config from the file location
+# config_file_location = 'condinst_r50_fpn_ms-poly-90k_coco_instance_few_shot.py'
 cfg = Config.fromfile(config_file_location)
 
 # Initialise metainfo for config
@@ -40,27 +47,43 @@ cfg.palette = palettes[:len(cfg.classes)]
 
 cfg.max_iter = 12
 
-cfg.data_root = 'data/FishDataset'
+cfg.data_root = '../data/FishDataset/'
 
-cfg.train_dataloader.dataset.type = 'COCODataset'
-cfg.train_dataloader.dataset.ann_file = cfg.data_root + 'annotations/MAIS2K_train.json'
-cfg.train_dataloader.dataset.data_prefix = cfg.data_root + 'train_MAIS2K/raw/'
+cfg.custom_imports = dict(imports=['runners.maml_runners.MAMLRunner', 
+                                   'loops.FewShotTrainLoop.MAMLFewShotTrainLoop'], 
+                          allow_failed_imports=False)
+
+cfg.train_dataloader.dataset.type = 'FewShotCocoDataset'
+cfg.train_dataloader.dataset.n_ways=5
+cfg.train_dataloader.dataset.n_shots=1
+cfg.train_dataloader.dataset.n_queries=15
+cfg.train_dataloader.dataset.data_root = cfg.data_root
+cfg.train_dataloader.dataset.ann_file = 'annotations/MAIS2K_train.json'
+cfg.train_dataloader.dataset.data_prefix.img = 'train_MAIS2K/raw/'
 cfg.train_dataloader.num_workers = 8
 cfg.train_dataloader.batch_size = 2
 
-cfg.val_dataloader.dataset.type = 'COCODataset'
-cfg.val_dataloader.dataset.ann_file = cfg.data_root + 'annotations/MAIS2K_test.json'
-cfg.val_dataloader.dataset.data_prefix = cfg.data_root + 'train_MAIS2K/raw/'
+cfg.val_dataloader.dataset.type = 'CocoDataset'
+cfg.val_dataloader.dataset.data_root = cfg.data_root
+cfg.val_dataloader.dataset.ann_file = 'annotations/MAIS2K_test.json'
+cfg.val_dataloader.dataset.data_prefix.img = 'train_MAIS2K/raw/'
 cfg.val_dataloader.num_workers = 2
 cfg.val_dataloader.batch_size = 1
+cfg.train_cfg.type='MAMLIterBasedTrainLoop'
+# cfg.train_cfg.max_iters=90000
+# cfg.train_cfg.val_interval=10000
+cfg.val_evaluator.ann_file = '../data/FishDataset/annotations/MAIS2K_test.json'
+cfg.test_evaluator.ann_file = '../data/FishDataset/annotations/MAIS2K_test.json'
 
 cfg.test_dataloader = cfg.val_dataloader
 
-cfg.work_dir = './outputs/CondInst/test_1'
+cfg.work_dir = "./outputs/CondInst/test_few_shot_thur/"
 
 cfg.model.bbox_head.num_classes = 17
 
+register_all_modules()
+
 # build the runner from config
 runner = Runner.from_cfg(cfg)
-
+print("did we get here?")
 runner.train()
